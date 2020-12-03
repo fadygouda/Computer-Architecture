@@ -7,7 +7,30 @@ class CPU:
 
     def __init__(self):
         """Construct a new CPU."""
-        pass
+        self.ram = [0] * 256
+
+        self.reg = [0] * 8
+
+        self.PC = 0 # program-counter
+        self.IR = 0 # instruction register
+        self.MAR = 0 # memory address register
+        self.MDR = 0 # memory data register
+        self.FL = 0 # flag register
+        self.halted = False
+        self.reg[7] = 0xF4
+    
+    def ram_read(self, MAR):
+        if MAR >= 0 and MAR < len(self.ram):
+            return self.ram[MAR]
+        else:
+            print(f"{MAR} not readable, outside memory")
+    
+    def ram_write(self, MAR, MDR):
+        if MAR >= 0 and MAR < len(self.ram):
+            self.ram[MAR] = MDR & 0xFF
+        else:
+            print(f"{MAR} not readable, outside memory")
+
 
     def load(self):
         """Load a program into memory."""
@@ -62,4 +85,19 @@ class CPU:
 
     def run(self):
         """Run the CPU."""
-        pass
+        running = True
+        while running:
+            self.IR = self.ram_read(self.PC)
+            operand_a = self.ram_read(self.PC + 1)
+            operand_b = self.ram_read(self.PC +2)
+
+            if self.IR == int('00000001', 2):
+                running = False
+            elif self.IR == int('10000010', 2):
+                self.reg[operand_a] = operand_b
+                self.PC += 3
+            elif self.IR == int('01000111', 2):
+                print(self.reg[operand_a])
+                self.PC += 2
+            else:
+                print(f"")
