@@ -7,6 +7,9 @@ PRN = 0b01000111
 MUL = 0b10100010
 PUSH = 0b01000101
 POP = 0b01000110
+CALL = 0b01010000
+RET = 0b00010001
+ADD = 0b10100000
 
 class CPU:
     """Main CPU class."""
@@ -91,6 +94,17 @@ class CPU:
             self.reg[operand_a] = self.ram[self.reg[self.sp]]
             self.reg[self.sp] += 1
             self.pc += 2
+        elif instruction == CALL:
+            self.reg[self.sp] -= 1
+            self.ram[self.reg[self.sp]] = self.pc + 2
+            reg_num = self.ram[self.pc + 1]
+            self.pc = self.reg[reg_num]
+        elif instruction == RET:
+            self.pc = self.ram[self.reg[self.sp]]
+            self.reg[self.sp] += 1 
+        elif instruction == ADD:
+            self.alu("ADD", operand_a, operand_b)
+            self.pc += 3
         else:
             print("INVALID INSTRUCTION.")
 
