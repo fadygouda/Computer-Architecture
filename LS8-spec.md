@@ -446,7 +446,7 @@ Machine code:
 `LDI register immediate`
 
 Set the value of a register to an integer.
-
+0xFF
 Machine code:
 ```
 10000010 00000rrr iiiiiiii
