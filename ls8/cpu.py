@@ -10,6 +10,10 @@ POP = 0b01000110
 CALL = 0b01010000
 RET = 0b00010001
 ADD = 0b10100000
+CMP = 0b10100111
+JEQ = 0b01010101
+JNE = 0b01010110
+JMP = 0b01010100
 
 class CPU:
     """Main CPU class."""
@@ -22,7 +26,7 @@ class CPU:
         self.ir = 0
         self.mar = 0
         self.mdr = 0
-        self.fl = 0
+        self.fl = 0b00000000
         self.halted = False
         self.sp = 7
     def load(self, filename):
@@ -47,6 +51,13 @@ class CPU:
         if op == "ADD":
             self.reg[reg_a] += self.reg[reg_b]
         #elif op == "SUB": etc
+        elif op == "CMP":
+            if self.reg[reg_a] < self.reg[reg_b]:
+                self.fl = 0b00000100
+            elif self.reg[reg_a] > self.reg[reg_b]:
+                self.fl = 0b00000010
+            else:
+                self.fl = 0b00000001
         else:
             raise Exception("Unsupported ALU operation")
 
@@ -57,7 +68,7 @@ class CPU:
         """
         print(f"TRACE: %02X | %02X %02X %02X |" % (
             self.pc,
-            #self.fl,
+            self.fl,
             #self.ie,
             self.ram_read(self.pc),
             self.ram_read(self.pc + 1),
@@ -104,6 +115,21 @@ class CPU:
             self.reg[self.sp] += 1 
         elif instruction == ADD:
             self.alu("ADD", operand_a, operand_b)
+            self.pc += 3
+        elif instruction == JEQ:
+            if self.fl == 0b1:
+                self.pc = self.reg[operand_a]
+            else:
+                self.pc += 2
+        elif instruction == JNE:
+            if self.fl != 0b1:
+                self.pc = self.reg[operand_a]
+            else:
+                self.pc += 2
+        elif instruction == JMP:
+            self.pc = self.reg[operand_a]
+        elif instruction == CMP:
+            self.alu("CMP", operand_a, operand_b)
             self.pc += 3
         else:
             print("INVALID INSTRUCTION.")
